@@ -617,7 +617,6 @@ def __init__(self):
     user.total_price()
     ```
     Output :
-    <br/>
 
     ![Test Case 1](assets/test-case-1.png)
 
@@ -637,6 +636,7 @@ def __init__(self):
     ```
 
     Output :
+
     ![Test Case 2](assets/test-case-2.png)
 
 3. Test Case 3 - Ternyata Customer salah memasukkan item yang ingin dibelanjakan! Daripada menghapus satu-satu, maka Customer cukup menggunakan method `reset_transaction()` untuk menghapus semua item yang sudah ditambahkan.
@@ -680,6 +680,7 @@ def __init__(self):
     ```
 
     Output :
+
     ![Test Case 4](assets/test-case-4.png)
 
 5. Test Case 5 - Ternyata Customer salah memasukan beberapa item, jumlah dan harga. Maka Custumer akan mengubahnya menggunakan *method* `update_item_name()`, `update_item_qty()`, dan `update_item_price()`
@@ -708,6 +709,7 @@ def __init__(self):
     ```
 
     Output :
+
     ![Test Case 5](assets/test-case-5.png)
 
 <br/>
