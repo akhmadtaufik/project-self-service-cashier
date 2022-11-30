@@ -509,7 +509,7 @@ def __init__(self):
 
     <br/>
 
-- *`total_transaction()`*
+- **`total_transaction()`**
     ```python
     def total_price(self):
         """Fungsi untuk menghitung total transaksi beserta diskonnya
@@ -568,7 +568,7 @@ def __init__(self):
 
     <br/>
 
-- *`reset_transaction()`*
+- **`reset_transaction()`**
     ```python
     def reset_transaction(self):
         """Fungsi untuk menghapus semua item dalam attribute class data
