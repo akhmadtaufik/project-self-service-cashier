@@ -49,9 +49,6 @@ class Transaction:
                 Jika parameter harga_item bukan float atau integer
         """
 
-        self.nama_item = nama_item
-        self.jumlah_item = jumlah_item
-        self.harga_item = harga_item
         # Check type of data parameter nama_item
         if type(nama_item) != str:
             raise TypeError(
