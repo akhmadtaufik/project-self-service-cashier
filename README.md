@@ -255,7 +255,6 @@ Modul database bertanggung jawab untuk menciptakan dan menyimpan data transaksi 
 ## _Test Case_
 
 1.  Test Case 1 - Customer ingin menambahkan dua item menggunakan method `add_item()`. Item yang ditambahkan sebagai berikut: - Nama Item: Ayam Goreng, Qty: 2, Harga: 20.000 - Nama Item: Pasta Gigi, Qty: 3, Harga: 15.000
-    <br/><br/>
 
         ```python
         user = Transaction()
@@ -271,11 +270,12 @@ Modul database bertanggung jawab untuk menciptakan dan menyimpan data transaksi 
         print("Order Table :")
         user.check_order()
         ```
-        Output :
+    
+       Output :
 
-        ![Test Case 1](assets/test-case-1.png)
+       ![Test Case 1](assets/test-case-1.png)
 
-2.  Test Case 2 - Ternyata Customer salah membeli salah satu item dari belnjaan yang sudah ditambahkan, maka Customer menggunakan method `delete_item()` untuk menghapus item. Item yang ingin dihapus adalah **Pasta Gigi**
+3.  Test Case 2 - Ternyata Customer salah membeli salah satu item dari belnjaan yang sudah ditambahkan, maka Customer menggunakan method `delete_item()` untuk menghapus item. Item yang ingin dihapus adalah **Pasta Gigi**
 
     ```python
     # Test Case 2
@@ -289,11 +289,11 @@ Modul database bertanggung jawab untuk menciptakan dan menyimpan data transaksi 
     user.check_out()
     ```
 
-    Output :
+       Output :
 
-    ![Test Case 2](assets/test-case-2.png)
+       ![Test Case 2](assets/test-case-2.png)
 
-3.  Test Case 3 - Ternyata Customer salah memasukkan item yang ingin dibelanjakan! Daripada menghapus satu-satu, maka Customer cukup menggunakan method `reset_transaction()` untuk menghapus semua item yang sudah ditambahkan.
+4.  Test Case 3 - Ternyata Customer salah memasukkan item yang ingin dibelanjakan! Daripada menghapus satu-satu, maka Customer cukup menggunakan method `reset_transaction()` untuk menghapus semua item yang sudah ditambahkan.
 
     ```python
     # Test Case 3
@@ -308,7 +308,7 @@ Modul database bertanggung jawab untuk menciptakan dan menyimpan data transaksi 
 
     ![Test Case 3](assets/test-case-3.png)
 
-4.  Test Case 4 - Setelah Customer selesai berbelanja, akan menghitung total belanja yang harus dibayarkan menggunakan _method_ `total_price()`. Sebelum mengeluarkan output total belanja akan menampilkan item-item yang dibeli.
+5.  Test Case 4 - Setelah Customer selesai berbelanja, akan menghitung total belanja yang harus dibayarkan menggunakan _method_ `total_price()`. Sebelum mengeluarkan output total belanja akan menampilkan item-item yang dibeli.
 
     ```python
       print("\n")
@@ -335,7 +335,7 @@ Modul database bertanggung jawab untuk menciptakan dan menyimpan data transaksi 
 
     ![Test Case 4](assets/test-case-4.png)
 
-5.  Test Case 5 - Ternyata Customer salah memasukan beberapa item, jumlah dan harga. Maka Custumer akan mengubahnya menggunakan _method_ `update_item_name()`, `update_item_qty()`, dan `update_item_price()`
+6.  Test Case 5 - Ternyata Customer salah memasukan beberapa item, jumlah dan harga. Maka Custumer akan mengubahnya menggunakan _method_ `update_item_name()`, `update_item_qty()`, dan `update_item_price()`
 
     ```python
     # Test Case 5
