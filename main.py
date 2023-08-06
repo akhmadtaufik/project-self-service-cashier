@@ -35,16 +35,16 @@ print("\n")
 print("Test Case 4")
 print("-----------")
 # Add Item 1
-user.add_item("Ayam Goreng", 2, 20_000)
+user.add_item("Ayam Goreng", 20, 20_000)
 print("\n")
 # Add Item 2
-user.add_item("Pasta Gigi", 3, 15_000)
+user.add_item("Pasta Gigi", 15, 15_000)
 print("\n")
 # Add Item 3
-user.add_item("Mainan Mobil", 1, 200_000)
+user.add_item("Mainan Mobil", 3, 200_000)
 print("\n")
 # Add Item 4
-user.add_item("Mie Instan", 5, 3_000)
+user.add_item("Mie Instan", 25, 3_000)
 print("\n")
 print("Order Table :")
 user.check_order()
