@@ -1,627 +1,281 @@
-# *Python Project: Self-Service Cashier*
+# _Python Project: Self-Service Cashier_
 
 ## Latar Belakang Problem
 
 Andi adalah seorang pemilik supermarket besar di salah satu kota di Indonesia. Andi memiliki rencana untuk melakukan ekspansi bisnis, yaitu: Andi akan membuat sistem kasir yang self-service di supermarket miliknya. Sehingga customer bisa langsung memasukan item yang dibeli, jumlah yang dibeli dan fitur lain. Sehingga customer yang tidak berada di kota tersebut bisa membeli barang dari supermarket tersebut.
 
-## *Tools*
-### Bahasa Pemograman:
-- Python
+## _Objectives_
 
-### *Libraries*:
-- Pandas
-- NumPy
-- pytz
-- datetime
-- tabulate
-
-<br/>
-
-## *Requirements / Objectives*
 ### Tujuan Pembelajaran:
-- Membuat *Self-Service Cashier* menggunakan Python
+
+- Membuat _Self-Service Cashier_ menggunakan Python
 - Menggunakan OOP dalam pembuatan program Python
-- Mengaplikasikan *Data Structure, Branching, try, and error* pembuatan program Python
-- Membuat dokumentasi *docstring* pembuatan program Python
-- Mengaplikasikan PEP8 dalam penulisan *clean code* pada program Python
+- Mengaplikasikan _Data Structure, Branching, try, and error_ pembuatan program Python
+- Membuat dokumentasi _docstring_ pembuatan program Python
+- Mengaplikasikan PEP8 dalam penulisan _clean code_ pada program Python
 
 <br/>
 
 ### Tujuan Program:
+
 - Membuat objek dari `class Transaction()`
-- Menambahkan *method* `add_item()` yang berisi parameter `nama_item`, `jumlah_item`, dan `harga_per_item` ke dalam *Self-Service Cashier*
-- Menambahkan *method* `update_item_name()`, `update_item_qty()`, dan `update_item_price()`. Mengubah berdasarkan parameter `nama_item` untuk mengubah nilai tiap-tiap item, jumlah, dan harga ke dalam *Self-Service Cashier*. 
-- Menambahkan *method* `delete_item()`ke dalam *Self-Service Cashier* untuk menghapus satu item berdasarkan parameter `nama_item`
-- Menambahkan *method* `reset_transaction()` ke dalam *Self-Service Cashier* untuk menghapus semua transaksi
-- Menambahkan *method* `check_order()` ke dalam *Self-Service Cashier* untuk melihat seluruh detail transaksi
-- Menambahkan *method* `total_price()` ke dalam *Self-Service Cashier* untuk mengetahui total pembayaran, dengan beberapa ketentuan:
-    - Jika total belanja di atas Rp.200.000 maka akan mendapatkan diskon 5%
-    - Jika total belanja di atas Rp.300.000 maka akan mendapatkan diskon 8%
-    - Jika total belanja di atas Rp.500.000 maka akan mendapatkan diskon 10%
+- Menambahkan _method_ `add_item()` yang berisi parameter `nama_item`, `jumlah_item`, dan `harga_per_item` ke dalam _Self-Service Cashier_
+- Menambahkan _method_ `update_item_name()`, `update_item_qty()`, dan `update_item_price()`. Mengubah berdasarkan parameter `nama_item` untuk mengubah nilai tiap-tiap item, jumlah, dan harga ke dalam _Self-Service Cashier_.
+- Menambahkan _method_ `delete_item()`ke dalam _Self-Service Cashier_ untuk menghapus satu item berdasarkan parameter `nama_item`
+- Menambahkan _method_ `reset_transaction()` ke dalam _Self-Service Cashier_ untuk menghapus semua transaksi
+- Menambahkan _method_ `check_order()` ke dalam _Self-Service Cashier_ untuk melihat seluruh detail transaksi
+- Menambahkan _method_ `check_out()` ke dalam _Self-Service Cashier_ untuk mengetahui total belanja, dengan beberapa ketentuan:
+  - Jika total harga per item di atas Rp.200.000 maka akan mendapatkan diskon 5%
+  - Jika total harga per item di atas Rp.300.000 maka akan mendapatkan diskon 6%
+  - Jika total harga per item di atas Rp.500.000 maka akan mendapatkan diskon 7%
+  - Setiap kali _method_ `check_out()` dijalankan, data transaksi akan dimasukkan ke dalam sqlite database.
 
 <br/>
 
-## *Flowchart*
+## _Requirements_
+
+Program ini membutuhkan beberapa _library_ dan modul tambahan yang harus diinstal sebelum menjalankan program:
+
+1. `pandas`: _library_ untuk memanipulasi dan menganalisis data dalam bentuk DataFrame.
+2. `pytz`: _library_ untuk bekerja dengan zona waktu dan penanganan waktu.
+3. `tabulate`: _library_ untuk membuat tabel dari data dalam berbagai format.
+4. `database`: Modul yang menyediakan fungsi untuk mengelola database terkait operasi transaksi.
+
+Untuk menggunakan modul database dengan sukses, Anda perlu memenuhi persyaratan berikut:
+
+1. `Python`: Pastikan Anda telah menginstal Python di sistem Anda.
+2. `SQLAlchemy`: _library_ `sqlalchemy` harus diinstal. Anda dapat menginstalnya menggunakan perintah `pip install sqlalchemy`.
+
+<br/>
+
+## _Flowchart_
+
+### Module `database`
+
+Modul `database` menangani pembuatan database SQLite dan sebuah tabel bernama 'transactions' untuk menyimpan data transaksi. _Flowchart_ untuk kode tersebut adalah sebagai berikut:
+
+1. Mengimpor library yang diperlukan: Modul ini mengimpor kelas dan fungsi yang diperlukan dari `sqlalchemy` untuk berinteraksi dengan database SQLite.
+
+2. Mendefinisikan struktur tabel: Modul ini mendefinisikan struktur tabel 'transactions', menentukan tipe data dari setiap kolom, primary key, dan nilai default menggunakan kelas 'Column'.
+
+3. Membuat database dan tabel: Fungsi `create_db()` bertanggung jawab untuk membuat database SQLite dan tabel 'transactions'. Fungsi ini membuat koneksi ke database menggunakan _engine_ yang telah ditentukan, mengeksekusi kueri SQL untuk membuat tabel jika tidak ada.
+
+4. Menyisipkan data ke dalam tabel: Fungsi `insert_to_table(data_list)` bertanggung jawab untuk memasukkan data ke dalam tabel 'transactions'. Fungsi ini melakukan tugas-tugas berikut:
+
+   - Memanggil `Base.metadata.create_all(engine)`.
+   - Membuat sesi menggunakan _class_ `sessionmaker` untuk mengelola interaksi database.
+   - Melakukan perulangan melalui setiap entri dalam `data_list` dan membuat objek `Transaksi` dengan data entri tersebut.
+   - Menambahkan setiap objek `Transaksi` ke sesi untuk dimasukkan ke dalam database.
+   - Melakukan perubahan ke database.
+
+### Module `cashier`
 
 ![Fig. 1](assets/flow-chart-self-service-cashier.png)
 
-Fig. 1 Merupakan flowchart atau alur program *self-service cashier*.
+Fig. 1 Merupakan flowchart atau alur program _self-service cashier_.
 
 <br/>
 
-### Proses Diagram
+Flowchart di atas menggambarkan langkah-langkah dan aliran logika dari kelas `Transaction`. Berikut adalah penjelasan alur code dalam program:
 
-![Fig.2](assets/diagram-process-self-service-cashier.png)
+1. Inisialisasi:
 
-Secara singkat proses seorang *customer* dalam melakukan pembelanjaan pertama kali adalah dengan memasukan barang ke dalam list belanja dengan menggunakan *method* `add_item` dengan *input* parameter `nama_item`, `jumlah_item` dan `harga_item`. Selanjutnya untuk mengecek apakah pesanannya sudah sesuai *customer* dapat melihat seluruh daftar belanja dengan menggunakan *method* `check_orders`. Jika *customer* salah memasukan salah satu dari parameter tersebut maka *customer* dapat merubah nilainya dengan menggunakan *method* `update` dengan *input* parameter `nama_item` dan `parameter` apa yang ingin dirubah. Apabila *customer* ingin membatalkan salah satu transaksi maka dapat menggunakan *method* `delete_item`. Jika semua detail transaksi sudah sesuai maka *customer* dapat mengetahui total belanja menggunakan *method* `total_price`. Setelah total belanja sudah keluar *customer* dapat menghapus seluruh sesi transaksi dengan menggunakan *method* `reset_transaction` atau bisa langsung melakukan pembayaran.
+   - Program dimulai dengan menginisialisasi data atribut dalam kelas `Transaction`, seperti `data`, `nama_toko`, `alamat`, `no_telepon`, `date`, `created_at`, dan `timestamp`.
 
-<br/>
+   - Library dan modul yang diperlukan juga diimpor, seperti Pandas, pytz, dan tabulate.
 
-### Pseudocode
-- *attribute class* berisi dataframe kosong
+2. Menambah Item (`add_item`):
 
-- *attribute* mengenai toko atau transaksi
-    ```python
-    def ___init___:
-        nama toko
-        alamat
-        nomor telepon
-        tanggal
-        waktu
-        timestamp
-    ```
+   - Fungsi ini digunakan untuk menambahkan item baru ke dalam data atribut `data` pada kelas `Transaction`.
+   - Fungsi ini menerima tiga parameter, yaitu `nama_item` (str), `jumlah_item` (int), dan `harga` (float atau int).
+   - Sebelum menambahkan item, fungsi akan melakukan beberapa validasi untuk memastikan data yang dimasukkan benar, seperti memastikan `nama_item` adalah string, `jumlah_item` adalah integer positif, dan `harga` adalah float atau integer positif.
 
-- add_item menambahkan item, jumlah dan harga ke dalam sesi transaksi
-    ```python
-    def add_item(nama_item, jumlah_item, harga_item):
-        cek tipe data parameter
-        masukan parameter ke dalam attribute class
-    ```
+3. Mengupdate Nama Item (`update_item_name`):
 
-- update_item_name merubah nama item jika terjadi kesalahan input
-    ```python
-    def update_item_name(nama_item, update_nama_item):
-        cek tipe data parameter
-        cek nama item dalam attribute class
-        merubah nama item dalam attribute class
-    ```
+   - Fungsi ini digunakan untuk mengupdate nama item yang ada dalam data atribut `data`.
+   - Fungsi ini menerima dua parameter, yaitu `nama_item` (str) dan `update_nama_item` (str).
+   - Sebelum mengupdate nama item, fungsi akan memastikan `nama_item` yang ada dalam data dan melakukan validasi untuk memastikan parameter yang dimasukkan adalah string.
 
-- update_item_qty merubah jumlah item berdasarkan nama item jika terjadi kesalahan input
-    ```python
-    def update_item_qty(nama_item, update_jumlah_item):
-        cek tipe data parameter
-        cek nama item di dalam attribute class
-        merubah jumlah item berdasarkan nama item
-    ```
+4. Mengupdate Jumlah Item (`update_item_qty`):
 
-- update_item_price merubah harga item berdasarkan nama item jika terjadi kesalahan input
-    ```python
-    def update_item_qty(nama_item, update_harga_item):
-        cek tipe data parameter
-        cek nama item di dalam attribute class
-        merubah harga item berdasarkan nama item
-    ```
+   - Fungsi ini digunakan untuk mengupdate jumlah item dari item yang ada dalam data atribut `data`.
+   - Fungsi ini menerima dua parameter, yaitu `nama_item` (str) dan `update_jml_item` (int).
+   - Sebelum mengupdate jumlah item, fungsi akan memastikan `nama_item` yang ada dalam data, memastikan `nama_item` adalah string, dan `update_jml_item` adalah integer positif.
 
-- delete_item menghapus satu baris berdasarkan nama_item dalam transaksi 
-    ```python
-    def delete_item(nama_item):
-        cek tipe data parameter
-        cek nama item di dalam attribute class
-        menghapus jumlah dan harga berdasarkan nama item
-    ```
+5. Mengupdate Harga Item (`update_item_price`):
 
-- reset_transaction menghapus semua sesi transaksi
-    ```python
-    def reset_transaction():
-        menampilkan pesan item sudah di reset
-        menampilakn tabel kosong
-    ```
+   - Fungsi ini digunakan untuk mengupdate harga dari item yang ada dalam data atribut `data`.
+   - Fungsi ini menerima dua parameter, yaitu `nama_item` (str) dan `update_harga` (float atau int).
+   - Sebelum mengupdate harga item, fungsi akan memastikan `nama_item` yang ada dalam data, memastikan `nama_item` adalah string, dan `update_harga` adalah float atau integer positif.
 
-- check_order menampilkan semua detail transaksi dalam bentuk tabel
-    ```python
-    def check_order():
-        membuat dataframe baru dengan cara copy attribute class
-        manambahkan kolom total harga untuk tiap item
-        membuat dan menampilkan tabel
-    ```
+6. Menghapus Item (`delete_item`):
 
-- total_price menampilkan total belanja dari sesi transaksi dengan ketentuan diskon
-    ```python
-    def total_transaction():
-        membuat dataframe baru dengan cara copy attribute class
-        manambahkan kolom total harga untuk tiap item
-        menjumlahkan kolom total harga
-        if total belanja < 200000:
-            harga normal
-        if total belanja < 30000:
-            diskon 5 persen
-        if total belanja < 500000:
-            diskon 8 persen
-        if total belanja > 500000:
-            diskon 10 persen
-    ```
+   - Fungsi ini digunakan untuk menghapus item yang ada dalam data atribut `data`.
+   - Fungsi ini menerima satu parameter, yaitu `nama_item` (str).
+   - Sebelum menghapus item, fungsi akan memastikan `nama_item` yang ada dalam data dan memastikan parameter yang dimasukkan adalah string.
+
+7. Melihat Pesanan (`check_order`):
+
+   - Fungsi ini digunakan untuk menghitung dan menampilkan total harga untuk tiap item yang ada dalam data atribut `data`.
+   - Fungsi ini tidak menerima parameter.
+   - Fungsi ini akan membuat tabel dari data dengan menambahkan kolom "total_harga" yang merupakan hasil dari perhitungan jumlah_item \* harga untuk setiap item.
+
+8. Melakukan Check Out (`check_out`):
+
+   - Fungsi ini digunakan untuk menghitung total harga dan diskon untuk tiap item dalam data atribut data.
+   - Fungsi ini tidak menerima parameter.
+   - Fungsi ini akan menghitung diskon berdasarkan total harga setiap item dan menambahkan kolom "diskon" dan "harga_diskon" ke data atribut `data`.
+
+9. Reset Transaksi (`reset_transaction`):
+   - Fungsi ini digunakan untuk menghapus semua item dalam data atribut `data`.
+   - Fungsi ini tidak menerima parameter.
+   - Fungsi ini akan menghapus semua data dalam `data` dan menampilkan tabel kosong sebagai hasilnya.
 
 <br/>
 
-## *Function / Attribute*
+## _Function_ dan _Attribute_
 
-*Script* `main.py` berfungsi untuk memanggil *module* `cashier.py` yang di dalamnya terdapat beberapa *function/method*, yaitu:
-1. `add_item` yang berfungsi untuk memasukan item ke dalam *list* belanja;
-2. `update_item_name` yang berfungsi untuk merubah `nama_item` di dalam *list* belanja;
-3. `update_item_qty` yang berfungsi untuk merubah `jumlah_item` di dalam *list* belanja;
-4. `update_item_price` yang berfungsi untuk merubah `harga_item` di dalam *list* belanja;
-5. `delete_item` yang berfungsi untuk menghapus satu item di dalam *list* belanja;
-6. `check_orders` yang berfungsi untuk menampilkan seluruh item di dalam *list* belanja;
-7. `total_price` yang berfungsi untuk menampilkan harga yang harus dibayar berdasarkan seluruh item di dalam *list* belanja;
-8. `reset_transaction` yang berfungsi untuk menghapus seluruh item dari sesi transaksi.
+### _Module_ `database`
 
-### Class Atribute
+Modul database berisi fungsi berikut:
 
-```python
-    empty_dict = {
-        "Item": [], 
-        "JumlahBarang": [], 
-        "Harga": []}
-    data = pd.DataFrame(empty_dict)
-```
-Pada *class attribute* berisikan dataframe kosong untuk menampung semua data transaksi
+1. **Fungsi `create_db`**
 
-### *Attribute*
+   - Tujuan: Fungsi ini membuat database SQLite dan tabel bernama 'transactions' jika belum ada. Fungsi ini melakukan tugas-tugas berikut:
+     - Membuat mesin database untuk database SQLite dengan nama 'andi-supermarket.db'.
+     - Mendefinisikan kueri SQL untuk membuat tabel 'transactions' dengan kolom-kolom untuk detail transaksi seperti nama item, jumlah, harga, harga total, diskon, harga akhir, dan timestamp.
+     - Menghubungkan ke database dan mengeksekusi kueri SQL untuk membuat tabel.
+   - Parameter: `None`
+   - Raises:
+     - `SQLAlchemyError`: Jika terjadi kesalahan saat membuat tabel.
+   - Contoh:
+     ```python
+     create_db()
+     ```
 
-```python
-def __init__(self):
-        self.nama_toko = "Supermarket Andi"
-        self.alamat = "Kota Besar"
-        self.no_telepon = "08098888"
-        # Initiate current time
-        now = datetime.datetime.now()
-        # Create date, timezone jakarta
-        self.date = (
-            pytz.timezone("Asia/Jakarta").localize(now).strftime("%Y-%m-%d")
-        )
-        # Create time, timezone jakarta
-        self.created_at = (
-            pytz.timezone("Asia/Jakarta").localize(now).strftime("%H:%M:%S")
-        )
-        # Created timestamp
-        self.timestamp = now.timestamp()
-```
-*Attribute* ini berisi berbagai informasi toko dan transaksi, seperti: Nama Toko, Alamat, Nomor Telepon, Tanggal Transaksi, Waktu Transaksi, dan *Timestamp*. Pada proses ini menggunakan *library* `datetime` untuk mengakses fungsi `datetime` dan *library* `pytz` untuk mengakses fungsi `timezone` dengan menggunakan `timezone` Jakarta.
+   > Catatan:
+   >
+   > - Sebelum memanggil fungsi ini, mesin database harus dikonfigurasi dengan dependensi yang diperlukan.
+   > - Jika tabel 'transactions' sudah ada, fungsi ini tidak akan membuat tabel baru.
 
-### *Method*
-- **`add_item()`**
+2. **Fungsi `insert_to_table(data_list)`**
 
-    ```python
-    def add_item(
-        self, nama_item: str, jumlah_item: int, harga_item: float or int
-    ):
-        """Fungsi untuk menambahkan nama_item, jumlah_item, harga_item
-            ke dalam attribute class data
+   - Fungsi ini menyisipkan data ke dalam tabel 'orders' menggunakan SQLAlchemy. Fungsi ini menerima sebuah list kamus, di mana setiap kamus berisi data untuk satu entri dalam tabel. Fungsi ini melakukan tugas-tugas berikut:
+     - Membuat _engine_ database untuk database SQLite dengan nama 'andi-supermarket.db'.
+     - Membuat tabel 'transactions' jika belum ada menggunakan metode `Base.metadata.create_all(engine)`.
+     - Membuat sesi menggunakan _class_ `sessionmaker` untuk mengelola interaksi database.
+     - Melakukan perulangan melalui setiap entri dalam `data_list` dan membuat objek `Transaction` dengan data entri tersebut.
+     - Menambahkan setiap objek `Transaction` ke sesi untuk dimasukkan ke dalam database.
+     - Melakukan perubahan ke database.
+   - Parameter:
+     - `data_list` (_list of dict_): Sebuah _list of dict_ di mana setiap _`dict`_ berisi data untuk satu entri dalam tabel 'transactions'.
+   - Contoh:
 
-        Args:
-            nama_item (str): nama item
-            jumlah_item (int): jumlah item
-            harga_item (float or int): harga per item
+     ```python
+     data_list = [
+         {
+             'nama_item': 'Item A',
+             'jumlah_item': 5,
+             'harga': 10000,
+             'total_harga': 50000,
+             'diskon': 10,
+             'harga_diskon': 45000
+         },
+     ]
 
-        Raises:
-            TypeError:
-                Jika parameter nama_item bukan string
-            TypeError:
-                Jika parameter jumlah_item bukan integer
-            TypeError:
-                Jika parameter harga_item bukan float atau integer
-        """
+     insert_to_table(data_list)
 
-        # Check type of data parameter nama_item
-        if type(nama_item) != str:
-            raise TypeError(
-                "Parameter 'nama_item' harus memiliki tipe data 'str'"
-            )
-        # Check type of data parameter jumlah_item
-        elif type(jumlah_item) != int:
-            raise TypeError(
-                "Parameter 'jumlah_item' harus memiliki tipe data 'int'"
-            )
-        # Check type of data parameter harga_item
-        elif type(harga_item) != float and type(harga_item) != int:
-            raise TypeError(
-                "Parameter 'harga_item' memiliki tipe data 'float' atau 'int'"
-            )
-        else:
-            # Assign parameter into attribute class data
-            self.data.loc[len(self.data)] = [
-                nama_item,
-                jumlah_item,
-                harga_item,
-            ]
-            print("Item yang Anda masukan:")
-            print(f"Nama Item     : {nama_item}")
-            print(f"Jumlah Barang : {jumlah_item}")
-            print(f"Harga per-Item: Rp. {harga_item}")
-    ```
+     ```
 
-    Pada *method* `add_item` ini memerlukan *input* parameter `nama_item` yang bertipe data `str`, `jumlah_item` yang bertipe data `int` dan `harga_item` yang bertipe data `float` atau `int`. Jika tipe data pada *input* parameter tidak sesuai maka akan me-`raise` `TypeError`. Jika sudah sesuai maka akan langsung ke proses memasukan *input* parameter tersebut ke dalam `DataFrame` di dalam *attribute class*. Selain memasukan ke dalam `DataFrame` *method* ini pun akan mengeluarkan pesan item apa saja yang sudah di-*input*, jika terjadi salah *input* maka dapat di-*update*.
+Modul database bertanggung jawab untuk menciptakan dan menyimpan data transaksi aplikasi Supermarket Andi melalui database dan tabel yang dibuat. Dengan demikian, data transaksi tetap tersimpan secara persisten, dan akses ke transaksi sebelumnya menjadi lebih mudah. Fungsi insert_to_table(data_list) pada modul ini juga berperan dalam menyisipkan data ke dalam tabel 'transactions' pada database SQLite, yang secara konsisten memastikan penyimpanan data transaksi untuk aplikasi Supermarket Andi.
 
-<br/>
+### _Module_ `cashier`
 
-- **`update_item_name()`**
-    ```python
-    def update_item_name(self, nama_item: str, update_nama_item: str):
-        """Fungsi untuk mengupdate nama_item jika nama_item terdapat
-            dalam attribute class data
+1. **Attribute `data`**:
 
-        Args:
-            nama_item (str): nama item lama
-            update_nama_item (str): nama item baru
+   - Merupakan DataFrame dari Pandas yang digunakan untuk menyimpan data sementara sebuah transaksi, seperti nama_item, jumlah_item, dan harga.
 
-        Raises:
-            ValueError:
-                Jika nama_item tidak terdapat dalam attribute class data
-            TypeError:
-                Jika parameter nama_item bukan string
-            TypeError:
-                Jika parameter update_nama_item bukan string
-        """
-        # Create list of all item in attribute class data
-        list_nama_item = self.data["Item"].tolist()
-        try:
-            # Check parameter nama_item in list_nama_item
-            if nama_item not in list_nama_item:
-                raise ValueError
-            else:
-                # Check type of data parameter nama_item
-                if type(nama_item) != str:
-                    raise TypeError(
-                        "Parameter 'nama_item' harus memiliki tipe data 'str'"
-                    )
-                # Check type of data parameter update_nama_item
-                elif type(update_nama_item) != str:
-                    raise TypeError(
-                        "Parameter 'update_nama_item' memiliki tipe data 'str'"
-                    )
-                else:
-                    # Filter by name_item
-                    # assign update_nama_item in attribute class data
-                    self.data.loc[
-                        self.data.Item == nama_item, "Item"
-                    ] = update_nama_item
-                    print(
-                        f"Anda merubah {nama_item} menjadi {update_nama_item}"
-                    )
+2. **Fungsi `add_item`**:
 
-        except ValueError:
-            print(f"Item {nama_item} tidak ditemukan dalam sesi transaksi ini")
-    ```
+   - Tujuan: Fungsi ini digunakan untuk menambahkan item baru ke dalam data transaksi.
+   - Parameter:
+     - `nama_item` (str): Nama item yang akan ditambahkan.
+     - `jumlah_item` (int): Jumlah item yang akan ditambahkan.
+     - `harga` (float atau int): Harga per item.
+   - Fungsionalitas: Fungsi ini pertama-tama memvalidasi parameter masukan untuk memastikan tipe data yang benar (string untuk `nama_item`, bilangan bulat positif untuk `jumlah_item`, dan bilangan pecahan positif atau bilangan bulat untuk `harga`). Kemudian, fungsi ini menambahkan detail item ke DataFrame `data`, dan mencetak detail item sebagai konfirmasi.
 
-    Pada *method* `update_item_name` ini memerlukan *input* parameter `nama_item` yang bertipe data `str` dan `update_nama_item` yang bertipe data `str`. Jika tipe data pada *input* parameter tidak sesuai maka akan me-`raise` `TypeError`. Jika sudah sesuai maka akan membuat `list ` yang berisikan kolom nama item dalam `DataFrame`, `list` tersebut berfungsi untuk memastikan apakah parameter `nama_item` terdapat di dalam `DataFrame` atau tidak. 
+3. **Fungsi `update_item_name`**:
 
-    <br/>
+   - Tujuan: Fungsi ini digunakan untuk memperbarui nama dari item yang sudah ada dalam data transaksi.
+   - Parameter:
+     - `nama_item` (str): Nama saat ini dari item yang akan diperbarui.
+     - `update_nama_item` (str): Nama baru untuk diperbarui pada item.
+   - Fungsionalitas: Fungsi ini pertama-tama memeriksa apakah `nama_item` ada dalam DataFrame `data`. Jika ditemukan, fungsi ini memvalidasi parameter masukan untuk memastikan tipe data berupa string. Kemudian, fungsi ini memperbarui `nama_item` pada baris yang sesuai dalam DataFrame, dan mencetak pesan konfirmasi.
 
-    Jika `nama_item` tidak terdapat dalam `DataFrame` maka akan me-`raise` `ValueError`. Jika tipe data sudah sesuai dan parameter sudah berada di dalam `DataFrame` maka langsung mencari `index` dari parameter `nama_item` di dalam  kolom `Item` pada `DataFrame` kemudian langsung mengubah `nama_item` menjadi `update_nama_item`. Selain merubah `nama_item` di dalam `DataFrame` *method* ini pun akan mengeluarkan pesan `nama_item` dirubah menjadi `update_nama_item`.
+4. **Fungsi `update_item_qty`**:
+
+   - Tujuan: Fungsi ini digunakan untuk memperbarui jumlah dari item yang sudah ada dalam data transaksi.
+   - Parameter: - `nama_item` (str): Nama item yang akan diperbarui jumlahnya. - `update_jml_item` (int): Jumlah baru untuk diperbarui pada item.
+     Fungsionalitas: Fungsi ini pertama-tama memeriksa apakah `nama_item` ada dalam DataFrame `data`. Jika ditemukan, fungsi ini memvalidasi parameter masukan untuk memastikan `nama_item` berupa string dan `update_jml_item` berupa bilangan bulat positif. Kemudian, fungsi ini memperbarui jumlah (`jumlah_item`) untuk item yang sesuai dalam DataFrame, dan mencetak pesan konfirmasi.
+
+5. **Fungsi `update_item_price`**:
+
+   - Tujuan: Fungsi ini digunakan untuk memperbarui harga dari item yang sudah ada dalam data transaksi.
+   - Parameter:
+     - `nama_item` (str): Nama item yang akan diperbarui harganya.
+     - `update_harga` (float atau int): Harga baru untuk diperbarui pada item.
+   - Fungsionalitas: Fungsi ini pertama-tama memeriksa apakah `nama_item` ada dalam DataFrame `data`. Jika ditemukan, fungsi ini memvalidasi parameter masukan untuk memastikan `nama_item` berupa string dan `update_harga` berupa bilangan pecahan positif atau bilangan bulat. Kemudian, fungsi ini memperbarui harga (`harga`) untuk item yang sesuai dalam DataFrame, dan mencetak pesan konfirmasi.
+
+6. **Fungsi `delete_item`**:
+
+   - Tujuan: Fungsi ini digunakan untuk menghapus item dari data transaksi.
+   - Parameter:
+     - `nama_item` (str): Nama item yang akan dihapus.
+   - Fungsionalitas: Fungsi ini memeriksa apakah `nama_item` ada dalam DataFrame `data`. Jika ditemukan, fungsi ini menghapus baris yang sesuai dari DataFrame, dan mencetak pesan konfirmasi. Jika tidak ditemukan, fungsi ini mencetak pesan bahwa item tidak ditemukan dalam sesi transaksi.
+
+7. **Fungsi `reset_transaction`**:
+
+   - Tujuan: Fungsi ini digunakan untuk menghapus semua item dari data transaksi, efektifnya mereset transaksi.
+   - Parameter: `None`
+   - Fungsionalitas: Fungsi ini menghapus semua `data` dari DataFrame data, sehingga mengosongkannya menjadi DataFrame kosong. Fungsi ini mencetak pesan yang mengkonfirmasi bahwa semua item telah dihapus.
+
+8. **Fungsi `check_order`**:
+
+   - Tujuan: Fungsi ini digunakan untuk menghitung dan menampilkan total harga untuk setiap item dalam data transaksi.
+   - Parameter: `None`
+   - Fungsionalitas: Fungsi ini membuat DataFrame baru (`output_data`) dengan menyalin DataFrame data. Kemudian, menghitung total harga (`total_harga`) untuk setiap item dan menambahkan kolom baru ke DataFrame `output_data`. Fungsi ini kemudian menampilkan tabel menggunakan library `tabulate`.
+
+9. **Fungsi `check_out`**:
+   - Tujuan: Fungsi ini digunakan untuk menghitung total harga dan diskon untuk setiap item dan memberikan jumlah pembayaran akhir untuk seluruh transaksi.
+   - Parameter: `None`
+   - Fungsionalitas: Fungsi ini membuat database (jika belum ada) menggunakan fungsi `create_db()`. Kemudian, membuat DataFrame baru (`output_data`) dengan menyalin DataFrame `data` dan menghitung total harga (`total_harga`) untuk setiap item. Juga menambahkan kolom baru untuk diskon (`diskon`) dan harga diskon (`harga_diskon`). Fungsi ini kemudian menghitung diskon yang sesuai berdasarkan total harga dan mengaplikasikannya ke setiap item. Terakhir, fungsi ini menampilkan tabel dengan semua detail dan jumlah pembayaran total. Fungsi ini juga mengonversi DataFrame `output_data` menjadi _list of dictionary_ dan menyisipkannya ke dalam database menggunakan fungsi `insert_to_table()`.
 
 <br/>
 
-- **`update_qty_item()`**
-
-    ```python
-    def update_item_qty(self, nama_item: str, update_jml_item: int):
-        """Fungsi untuk mengupdate jumlah_item dalam jika nama_item
-            terdapat dalam attribute class data
-
-        Args:
-            nama_item (str):
-                    nama item sebagai keys untuk mengupdate jumlah_item
-            update_jml_item (int):
-                    value jumlah_item baru yang akan di update
-
-        Raises:
-            ValueError:
-                Jika nama_item tidak terdapat dalam attribute class data
-            TypeError:
-                Jika parameter nama_item bukan string
-            TypeError:
-                Jika parameter update_jml_item bukan integer
-        """
-
-        # Create list of all item in attribute class data
-        list_nama_item = self.data["Item"].tolist()
-        try:
-            # Check parameter nama_item in list_nama_item
-            if nama_item not in list_nama_item:
-                raise ValueError
-            else:
-                # Check type of data parameter nama_item
-                if type(nama_item) != str:
-                    raise TypeError(
-                        "Parameter 'nama_item' harus memiliki tipe data 'str'"
-                    )
-                # Check type of data parameter update_jml_item
-                elif type(update_jml_item) != int:
-                    raise TypeError(
-                        "Parameter 'update_jml_item' memiliki tipe data 'int'"
-                    )
-                else:
-                    # Filter by nama_item
-                    # assign update_jml_item in attribute class data
-                    self.data.loc[
-                        self.data.Item == nama_item, "JumlahBarang"
-                    ] = update_jml_item
-                    print(
-                        f"Anda merubah Jumlah {nama_item} menjadi {update_jml_item}"
-                    )
-
-        except ValueError:
-            print(f"Item {nama_item} tidak ditemukan dalam sesi transaksi ini")
-    ```
-
-    Pada *method* `update_item_qty` ini memerlukan *input* parameter `nama_item` yang bertipe data `str` dan `update_jml_item` yang bertipe data `int`. Jika tipe data pada *input* parameter tidak sesuai maka akan me-`raise` `TypeError`. Jika sudah sesuai maka akan membuat `list ` yang berisikan kolom nama item dalam `DataFrame`, `list` tersebut berfungsi untuk memastikan apakah parameter `nama_item` terdapat di dalam `DataFrame` atau tidak. 
-
-    <br/>
-
-    Jika `nama_item` tidak terdapat dalam `DataFrame` maka akan me-`raise` `ValueError`. Jika tipe data sudah sesuai dan parameter sudah berada di dalam `DataFrame` maka langsung mencari `index` dari parameter `nama_item` di dalam  kolom `JumlahBarang` pada `DataFrame` kemudian langsung mengubah `jumlah_item` menjadi `update_jml_item`. Selain merubah `jumlah_item` di dalam `DataFrame` *method* ini pun akan mengeluarkan pesan jumlah `nama_item` dirubah menjadi `update_nama_item`.
-
-<br/>
-
-- **`update_item_price()`**
-    ```python
-    def update_item_price(self, nama_item: str, update_harga: float or int):
-        """Fungsi untuk mengupdate harga dalam jika nama_item terdapat
-            dalam attribute class data
-
-        Args:
-            nama_item (str): nama item sebagai keys untuk mengupdate harga
-            update_harga (float / int): value harga baru yang akan di update
-
-        Raises:
-            ValueError:
-                Jika nama_item tidak terdapat dalam attribute class data
-            TypeError:
-                Jika parameter nama_item bukan string
-            TypeError:
-                Jika parameter update_harga bukan integer atau float
-        """
-        # Create list of all item in attribute class data
-        list_nama_item = self.data["Item"].tolist()
-        try:
-            # Check parameter nama_item in list_nama_item
-            if nama_item not in list_nama_item:
-                raise ValueError
-
-            else:
-                # Check type of data parameter nama_item
-                if type(nama_item) != str:
-                    raise TypeError(
-                        "Parameter 'nama_item' harus memiliki tipe data 'str'"
-                    )
-
-                # Check type of data parameter update_harga
-                elif type(update_harga) != float and type(update_harga) != int:
-                    raise TypeError(
-                        "Parameter 'update_harga' memiliki tipe data float/int"
-                    )
-
-                else:
-                    # Filter by nama_item
-                    # assign update_harga in attribute class data
-                    self.data.loc[
-                        self.data.Item == nama_item, "Harga"
-                    ] = update_harga
-                    print(
-                        f"Anda merubah harga {nama_item} menjadi {update_harga}"
-                    )
-
-        except ValueError:
-            print(f"Item {nama_item} tidak ditemukan dalam sesi transaksi ini")
-    ```
-
-    Pada *method* `update_item_price` ini memerlukan *input* parameter `nama_item` yang bertipe data `str` dan `update_harga` yang bertipe data `float` atau `int`. Jika tipe data pada *input* parameter tidak sesuai maka akan me-`raise` `TypeError`. Jika sudah sesuai maka akan membuat `list` yang berisikan kolom nama item dalam `DataFrame`, `list` tersebut berfungsi untuk memastikan apakah parameter `nama_item` terdapat di dalam `DataFrame` atau tidak. 
-
-    <br/>
-
-    Jika `nama_item` tidak terdapat dalam `DataFrame` maka akan me-`raise` `ValueError`. Jika tipe data sudah sesuai dan parameter sudah berada di dalam `DataFrame` maka langsung mencari `index` dari parameter `nama_item` di dalam  kolom `Harga` pada `DataFrame` kemudian langsung mengubah `harga_item` menjadi `update_harga`. Selain merubah `harga_item` di dalam `DataFrame` *method* ini pun akan mengeluarkan pesan harga `nama_item` dirubah menjadi `update_harga`.
-
-    <br/>
-
-- **`delete_item()`**
-    ```python
-    def delete_item(self, nama_item: str):
-        """Fungsi untuk menghapus salah satu item yang terdapat dalam
-            attribute class data
-
-        Args:
-            nama_item (str): nama_item yang ingin dihapus
-
-        Raises:
-            ValueError:
-                Jika nama_item tidak terdapat dalam attribute class data
-            TypeError:
-                Jika parameter nama_item bukan string
-
-        Returns:
-           table : order tabel dengan attribute class data yang masih aktif
-        """
-
-        # Create list of all item in attribute class data
-        list_nama_item = self.data["Item"].tolist()
-        try:
-            # Check parameter nama_item in list_nama_item
-            if nama_item not in list_nama_item:
-                raise ValueError
-
-            else:
-                # Check type of data parameter nama_item
-                if type(nama_item) != str:
-                    raise TypeError(
-                        "Parameter 'nama_item' harus memiliki tipe data 'str'"
-                    )
-                else:
-                    # Show deleted item
-                    print(
-                        f"Anda telah menghapus item {nama_item} dari transaksi"
-                    )
-
-                    # Filter and drop by nama_item
-                    data = self.data.drop(
-                        self.data.index[self.data.Item == nama_item],
-                        inplace=True,
-                    )
-
-                    # Assign and show table
-                    table = tabulate(data, headers="keys", tablefmt="psql")
-
-                    return print(table)
-
-        except ValueError:
-            print(f"Item {nama_item} tidak ditemukan dalam sesi transaksi ini")
-    ```
-
-    Pada *method* `delete_item` ini memerlukan *input* parameter `nama_item` yang bertipe data `str`. Jika tipe data pada *input* parameter tidak sesuai maka akan me-`raise` `TypeError`. Jika sudah sesuai maka akan membuat `list` yang berisikan kolom nama item dalam `DataFrame`, `list` tersebut berfungsi untuk memastikan apakah parameter `nama_item` terdapat di dalam `DataFrame` atau tidak. 
-
-    <br/>
-
-    Jika `nama_item` tidak terdapat dalam `DataFrame` maka akan me-`raise` `ValueError`. Jika tipe data sudah sesuai dan parameter sudah berada di dalam `DataFrame` maka langsung mencari `index` dari parameter `nama_item` di dalam  kolom `Item` pada `DataFrame` dan akan menghapus `row` dari `nama_item` tersebut. Setelah menghapus `row` tersebut akan mengeluarkan pesan `nama` item telah dihapus dari *list* belanja. Selanjutnya akan menampilkan tebel dari *list* belanja yang tersisa.
-
-    <br/>
-
-- **`check_orders()`**
-    ```python
-    def check_order(self):
-        """Fungsi untuk menghitung dan menampilkan total harga untuk tiap item
-
-        Returns:
-            table: Tabel order dengan total harga untuk tiap transaksinya
-        """
-
-        # Copy attribute class data
-        output_data = self.data.copy()
-
-        # Create new column
-        output_data["TotalHarga"] = (
-            output_data.JumlahBarang * output_data.Harga
-        )
-        # Create and show table
-        table = tabulate(output_data, headers="keys", tablefmt="psql")
-
-        return print(table)
-    ```
-
-    Pada *method* `check_orders` ini tidak memerlukan *input* parameter apa pun, sehingga yang pertama dilakukan adalah membuat *copy* dari `DataFrame` dalam *attribute class* untuk membuat `DataFrame` baru yang berisi kolom baru yang bernama `TotalHarga`. Kolom baru ini berisi mengenai total harga dari setiap item, dengan kata lain merupakan agregasi dari kolom `JumlahBarang` dan `Harga`. Setelah pembuatan kolom baru selesai maka fungsi ini akan me-*return* detail tabel transaksi yang menggunakan `library tabulate`.
-
-    <br/>
-
-- **`total_transaction()`**
-    ```python
-    def total_price(self):
-        """Fungsi untuk menghitung total transaksi beserta diskonnya
-
-        Returns:
-            int : total transaksi
-        """
-        # Copy attribute class data
-        output_data = self.data.copy()
-        # Create new column
-        output_data["TotalHarga"] = (
-            output_data.JumlahBarang * output_data.Harga
-        )
-        # Assign variable total payment
-        total = np.sum(output_data.TotalHarga)
-
-        # If total payment les than 200.000 get normal price
-        if total >= 0 and total <= 200_000:
-            return print(f"Total Transaksi Anda adalah Rp.{int(total)}")
-
-        # if total paymen more than 200.000 and less than 300.000
-        # Get 5 percent discount
-        elif total > 200_000 and total <= 300_000:
-            total_belanja = total * 0.95
-            return print(
-                f"Total Transaksi Anda adalah Rp.{int(total_belanja)}"
-            )
-
-        # if total paymen more than 300.000 and less than 500.000
-        # Get 8 percent discount
-        elif total > 300_000 and total <= 500_000:
-            total_belanja = total * 0.92
-            return print(
-                f"Total Transaksi Anda adalah Rp.{int(total_belanja)}"
-            )
-
-        # if total paymen more than 500.000, get 10 percent discount
-        elif total > 500_000:
-            total_belanja = total * 0.90
-            return print(
-                f"Total Transaksi Anda adalah Rp.{int(total_belanja)}"
-            )
-
-        else:
-            return "Total Belanja Tidak Boleh Negatif"
-    ```
-
-     Pada *method* `total_price` ini tidak memerlukan *input* parameter apa pun, sehingga yang pertama dilakukan adalah membuat *copy* dari `DataFrame` dalam *attribute class* untuk membuat `DataFrame` baru yang berisi kolom baru yang bernama `TotalHarga`. Kolom baru ini berisi mengenai total harga dari setiap item, dengan kata lain merupakan agregasi dari kolom `JumlahBarang` dan `Harga`. Setelah pembuatan kolom baru selesai maka kolom `TotalHarga` akan diagregasi dengam `SUM` untuk mengetahui nilai total belanja.
-
-     <br/>
-
-     Pada *method* `total_price` ini memiliki beberapa ketentuan mengenai total belanja yang akan dibayarkan oleh *customer* melalui diskon. Harga diskon diterapkan dengan beberapa kriteria:
-     1. Jika total belanjanya lebih dari Rp.200.000 maka akan mendapat potongan diskon sebesar 5 persen;
-     2. Jika total belanjanya lebih dari Rp.300.000 maka akan mendapat potongan diskon sebesar 8 persen;
-     3. Jika total belanjanya lebih dari Rp.500.000 maka akan mendapat potongan diskon sebesar 10 persen.
-
-    <br/>
-
-- **`reset_transaction()`**
-    ```python
-    def reset_transaction(self):
-        """Fungsi untuk menghapus semua item dalam attribute class data
-
-        Returns:
-            table: order tabel kosong
-        """
-
-        # Show blank table
-        print("Semua item berhasil di delete!")
-
-        # Drop index in attribute class data
-        self.data.drop(self.data.index, inplace=True)
-
-        # Create  and show table
-        table = tabulate(self.data, headers="keys", tablefmt="psql")
-
-        return print(table)
-    ```
-
-    Pada *method* `reset_transaction` ini tidak memerlukan *input* parameter apa pun, sehingga yang pertama dilakukan adalah menghapus semua yang ada di dalam `DataFrame` dengan menggunakan `method` `drop()` dari `library pandas`. Selanjutnya akan menampilkan pesan "Semua item berhasil di delete!" yang selanjutnya akan me-`return` *blank table*.
-
-<br/>
-
-## *Test Case*
-
-1. Test Case 1 - Customer ingin menambahkan dua item menggunakan method `add_item()`. Item yang ditambahkan sebagai berikut:
-    - Nama Item: Ayam Goreng, Qty: 2, Harga: 20.000
-    - Nama Item: Pasta Gigi, Qty: 3, Harga: 15.000
-<br/><br/>
-
-
-    ```python
-    user = Transaction()
-    # Test Case 1
-    # Add Item 1
-    print("Test Case 1")
-    print("-----------")
-    user.add_item("Ayam Goreng", 2, 20_000)
-    print("\n")
-    # Add Item 2
-    user.add_item("Pasta Gigi", 3, 15_000)
-    print("\n")
-    print("Order Table :")
-    user.check_order()
-    user.total_price()
-    ```
-    Output :
-
-    ![Test Case 1](assets/test-case-1.png)
-
-2. Test Case 2 - Ternyata Customer salah membeli salah satu item dari belnjaan yang sudah ditambahkan, maka Customer menggunakan method `delete_item()` untuk menghapus item. Item yang ingin dihapus adalah **Pasta Gigi**
-
+## _Test Case_
+
+1.  Test Case 1 - Customer ingin menambahkan dua item menggunakan method `add_item()`. Item yang ditambahkan sebagai berikut: - Nama Item: Ayam Goreng, Qty: 2, Harga: 20.000 - Nama Item: Pasta Gigi, Qty: 3, Harga: 15.000
+    <br/><br/>
+
+        ```python
+        user = Transaction()
+        # Test Case 1
+        # Add Item 1
+        print("Test Case 1")
+        print("-----------")
+        user.add_item("Ayam Goreng", 15, 20_000)
+        print("\n")
+        # Add Item 2
+        user.add_item("Pasta Gigi", 3, 15_000)
+        print("\n")
+        print("Order Table :")
+        user.check_order()
+        ```
+        Output :
+
+        ![Test Case 1](assets/test-case-1.png)
+
+2.  Test Case 2 - Ternyata Customer salah membeli salah satu item dari belnjaan yang sudah ditambahkan, maka Customer menggunakan method `delete_item()` untuk menghapus item. Item yang ingin dihapus adalah **Pasta Gigi**
 
     ```python
     # Test Case 2
@@ -632,14 +286,14 @@ def __init__(self):
     user.delete_item("Pasta Gigi")
     print("Order Table :")
     user.check_order()
-    user.total_price()
+    user.check_out()
     ```
 
     Output :
 
     ![Test Case 2](assets/test-case-2.png)
 
-3. Test Case 3 - Ternyata Customer salah memasukkan item yang ingin dibelanjakan! Daripada menghapus satu-satu, maka Customer cukup menggunakan method `reset_transaction()` untuk menghapus semua item yang sudah ditambahkan.
+3.  Test Case 3 - Ternyata Customer salah memasukkan item yang ingin dibelanjakan! Daripada menghapus satu-satu, maka Customer cukup menggunakan method `reset_transaction()` untuk menghapus semua item yang sudah ditambahkan.
 
     ```python
     # Test Case 3
@@ -654,55 +308,55 @@ def __init__(self):
 
     ![Test Case 3](assets/test-case-3.png)
 
-4. Test Case 4 - Setelah Customer selesai berbelanja, akan menghitung total belanja yang harus dibayarkan menggunakan *method* `total_price()`. Sebelum mengeluarkan output total belanja akan menampilkan item-item yang dibeli.
+4.  Test Case 4 - Setelah Customer selesai berbelanja, akan menghitung total belanja yang harus dibayarkan menggunakan _method_ `total_price()`. Sebelum mengeluarkan output total belanja akan menampilkan item-item yang dibeli.
 
     ```python
-    print("\n")
-    print("Test Case 4")
-    print("-----------")
-    # Add Item 1
-    user.add_item("Ayam Goreng", 2, 20_000)
-    print("\n")
-    # Add Item 2
-    user.add_item("Pasta Gigi", 3, 15_000)
-    print("\n")
-    # Add Item 3
-    user.add_item("Mainan Mobil", 1, 200_000)
-    print("\n")
-    # Add Item 4
-    user.add_item("Mie Instan", 5, 3_000)
-    print("\n")
-    print("Order Table :")
-    user.check_order()
-    user.total_price()
+      print("\n")
+      print("Test Case 4")
+      print("-----------")
+      # Add Item 1
+      user.add_item("Ayam Goreng", 20, 20_000)
+      print("\n")
+      # Add Item 2
+      user.add_item("Pasta Gigi", 15, 15_000)
+      print("\n")
+      # Add Item 3
+      user.add_item("Mainan Mobil", 3, 200_000)
+      print("\n")
+      # Add Item 4
+      user.add_item("Mie Instan", 25, 3_000)
+      print("\n")
+      print("Order Table :")
+      user.check_order()
+      user.check_out()
     ```
 
     Output :
 
     ![Test Case 4](assets/test-case-4.png)
 
-5. Test Case 5 - Ternyata Customer salah memasukan beberapa item, jumlah dan harga. Maka Custumer akan mengubahnya menggunakan *method* `update_item_name()`, `update_item_qty()`, dan `update_item_price()`
+5.  Test Case 5 - Ternyata Customer salah memasukan beberapa item, jumlah dan harga. Maka Custumer akan mengubahnya menggunakan _method_ `update_item_name()`, `update_item_qty()`, dan `update_item_price()`
 
     ```python
     # Test Case 5
-    # Update Item, JumlahBarang, dan Harga
-    print("\n")
-    print("Test Case 5")
-    print("-----------")
-    print("Order Table Before:")
-    user.check_order()
-    user.total_price()
-    print("\n")
-    # Update Item pasta gigi
-    user.update_item_name("Pasta Gigi", "Sabun Mandi")
-    # Update JumlahBarang ayam goreng
-    user.update_item_qty("Ayam Goreng", 3)
-    # Update Harga mie instan
-    user.update_item_price("Mie Instan", 3_500)
-    print("\n")
-    print("Order Table After:")
-    user.check_order()
-    user.total_price()
+      # Update Item, JumlahBarang, dan Harga
+      print("\n")
+      print("Test Case 5")
+      print("-----------")
+      print("Order Table Before:")
+      user.check_order()
+      print("\n")
+      # Update Item pasta gigi
+      user.update_item_name("Pasta Gigi", "Sabun Mandi")
+      # Update JumlahBarang ayam goreng
+      user.update_item_qty("Ayam Goreng", 3)
+      # Update Harga mie instan
+      user.update_item_price("Mie Instan", 3_500)
+      print("\n")
+      print("Order Table After:")
+      user.check_order()
+
+      user.check_out()
     ```
 
     Output :
@@ -711,12 +365,37 @@ def __init__(self):
 
 <br/>
 
-## *Conclusion*
+## _Conclusion_
 
-Secara umum program *self-service cashier* ini sudah berjalan dengan baik, akan tetapi ada beberapa hal yang harus dilakukan di lain waktu untuk meningkatkan performanya, seperti:
-1. Lebih baik *connect* dengan database agar semua *record* transaksi dapat disimpan dan di analisa kedepannya;
-2. *Flowchart*-nya bisa lebih efesien lagi terutama pada fungsi di *method* yang alurnya bisa lebih padat lagi.
+Program cashier Supermarket Andi merupakan aplikasi kasir sederhana yang memungkinkan pengguna untuk melakukan transaksi pembelian barang di supermarket. Program ini dibuat menggunakan bahasa Python dan menggunakan beberapa library seperti pandas, pytz, tabulate, dan SQLAlchemy.
+
+Dalam program ini, terdapat kelas `Transaction` yang merepresentasikan transaksi kasir dengan berbagai fungsi dasar seperti menambah, mengupdate, dan menghapus item transaksi. Selain itu, program ini juga menghitung total harga untuk tiap item dan menerapkan diskon berdasarkan total harga.
+
+Beberapa fitur utama dari program ini meliputi:
+
+1. Menambahkan item ke dalam transaksi dengan fungsi add_item.
+2. Mengupdate nama item, jumlah item, atau harga item dengan fungsi update_item_name, update_item_qty, dan update_item_price.
+3. Menghapus item dari transaksi dengan fungsi delete_item.
+4. Melakukan check-out dan menghitung total harga serta diskon untuk tiap item dengan fungsi check_out.
+
+Program ini juga memiliki fitur untuk menyimpan data transaksi ke dalam database SQLite dengan bantuan modul `database` yang memanfaatkan SQLAlchemy.
+
+Potensi untuk perbaikan (_improvement_):
+
+- Error Handling: Saat ini, program hanya mencetak pesan kesalahan jika terjadi kesalahan dalam mengakses database. Perlu diperbaiki dengan penanganan kesalahan yang lebih baik, termasuk memberikan pesan kesalahan yang lebih informatif untuk membantu pemecahan masalah.
+
+- User Interface: Program saat ini hanya berjalan di terminal dan tidak memiliki antarmuka grafis. Pengembangan lebih lanjut bisa dilakukan untuk menciptakan antarmuka pengguna yang lebih interaktif dan intuitif.
+
+- Data Persistance: Selain menyimpan data transaksi ke dalam database SQLite, program dapat diperluas untuk mendukung sistem manajemen basis data yang lebih robust seperti MySQL, PostgreSQL, atau MongoDB.
+
+- Handling Data Duplikat: Saat ini, program tidak mengatasi kasus duplikasi item dalam transaksi. Dapat ditambahkan fitur untuk menangani kasus duplikasi dan menggabungkan jumlah item yang sama.
+
+- Validasi Input: Dalam beberapa fungsi, perlu dilakukan validasi input lebih ketat untuk menghindari masalah data yang tidak valid.
+
+- Optimisasi Performa: Program dapat diperbaiki secara keseluruhan untuk meningkatkan performa dan efisiensi, terutama dalam operasi database dan perhitungan diskon.
+
+Dalam pengembangan lebih lanjut, hal-hal di atas dapat dipertimbangkan untuk membuat program cashier Supermarket Andi menjadi lebih kuat, lebih aman, dan lebih mudah digunakan oleh pengguna.
 
 <br/>
 
-**Author** Copyright ⓒ 2022 Akhmad Taufik Ismail
+**Author** Copyright ⓒ 2023 Akhmad Taufik Ismail
