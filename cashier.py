@@ -1,15 +1,52 @@
-import numpy as np
 import pandas as pd
 import pytz
 import datetime
+
 from tabulate import tabulate
+from database import create_db, insert_to_table
 
 
 class Transaction:
-    """Berisi fungsi dasar dalam program kasir"""
+    """
+    Represents a cashier transaction with basic functions.
+
+    This class provides basic functionalities for a cashier transaction,
+    including adding, updating, and deleting items. It also calculates the
+    total price for each item and applies discounts based on the total price.
+
+    Attributes:
+        data (DataFrame): Pandas DataFrame to store the transaction items.
+        nama_toko (str): The name of the supermarket.
+        alamat (str): The address of the supermarket.
+        no_telepon (str): The contact number of the supermarket.
+        date (str): The current date in the format 'YYYY-MM-DD'.
+        created_at (str): The current time in the format 'HH:MM:SS'.
+        timestamp (float): The timestamp of the transaction creation.
+
+    Example:
+        Create a Transaction instance:
+        >>> transaction = Transaction()
+
+        Add an item to the transaction:
+        >>> transaction.add_item("Product A", 2, 5000)
+
+        Update the quantity of an item:
+        >>> transaction.update_item_qty("Product A", 5)
+
+        Calculate the total price and apply discounts for each item:
+        >>> transaction.check_out()
+
+    Note:
+        The 'database' module is used to handle database-related operations.
+        'create_db' creates the database and the 'transactions' table if they
+            do not exist.
+        'insert_to_table' is used to insert the transaction data into the
+            table.
+
+    """
 
     # Initiate empty dict and assign to DataFrame
-    empty_dict = {"Item": [], "JumlahBarang": [], "Harga": []}
+    empty_dict = {"nama_item": [], "jumlah_item": [], "harga": []}
     data = pd.DataFrame(empty_dict)
 
     def __init__(self):
@@ -29,24 +66,22 @@ class Transaction:
         # Created timestamp
         self.timestamp = now.timestamp()
 
-    def add_item(
-        self, nama_item: str, jumlah_item: int, harga_item: float or int
-    ):
+    def add_item(self, nama_item: str, jumlah_item: int, harga: float or int):
         """Fungsi untuk menambahkan nama_item, jumlah_item, harga_item
             ke dalam attribute class data
 
         Args:
             nama_item (str): nama item
             jumlah_item (int): jumlah item
-            harga_item (float or int): harga per item
+            harga (float or int): harga per item
 
         Raises:
             TypeError:
                 Jika parameter nama_item bukan string
-            TypeError:
-                Jika parameter jumlah_item bukan integer
-            TypeError:
-                Jika parameter harga_item bukan float atau integer
+            ValueError:
+                Jika parameter jumlah_item bukan integer positif
+            ValueError:
+                Jika parameter harga bukan float atau integer positif
         """
 
         # Check type of data parameter nama_item
@@ -54,27 +89,31 @@ class Transaction:
             raise TypeError(
                 "Parameter 'nama_item' harus memiliki tipe data 'str'"
             )
-        # Check type of data parameter jumlah_item
-        elif type(jumlah_item) != int:
-            raise TypeError(
-                "Parameter 'jumlah_item' harus memiliki tipe data 'int'"
+
+        # Check type of data parameter jumlah_item and ensure it is a
+        # positive integer
+        if not isinstance(jumlah_item, int) or jumlah_item < 0:
+            raise ValueError(
+                "Parameter 'jumlah_item' harus merupakan integer positif"
             )
-        # Check type of data parameter harga_item
-        elif type(harga_item) != float and type(harga_item) != int:
-            raise TypeError(
-                "Parameter 'harga_item' memiliki tipe data 'float' atau 'int'"
+
+        # Check type of data parameter harga and ensure it is a
+        # positive float or integer
+        if not (isinstance(harga, (float, int)) and harga >= 0):
+            raise ValueError(
+                "Parameter 'harga' harus merupakan float atau integer positif"
             )
-        else:
-            # Assign parameter into attribute class data
-            self.data.loc[len(self.data)] = [
-                nama_item,
-                jumlah_item,
-                harga_item,
-            ]
-            print("Item yang Anda masukan:")
-            print(f"Nama Item     : {nama_item}")
-            print(f"Jumlah Barang : {jumlah_item}")
-            print(f"Harga per-Item: Rp. {harga_item}")
+
+        # Assign parameter into attribute class data
+        self.data.loc[len(self.data)] = [
+            nama_item,
+            jumlah_item,
+            harga,
+        ]
+        print("Item yang Anda masukan:")
+        print(f"Nama Item     : {nama_item}")
+        print(f"Jumlah Barang : {jumlah_item}")
+        print(f"Harga per-Item: Rp. {harga}")
 
     def update_item_name(self, nama_item: str, update_nama_item: str):
         """Fungsi untuk mengupdate nama_item jika nama_item terdapat
@@ -93,27 +132,30 @@ class Transaction:
                 Jika parameter update_nama_item bukan string
         """
         # Create list of all item in attribute class data
-        list_nama_item = self.data["Item"].tolist()
+        list_nama_item = self.data["nama_item"].tolist()
         try:
             # Check parameter nama_item in list_nama_item
             if nama_item not in list_nama_item:
                 raise ValueError
+
             else:
                 # Check type of data parameter nama_item
                 if type(nama_item) != str:
                     raise TypeError(
                         "Parameter 'nama_item' harus memiliki tipe data 'str'"
                     )
+
                 # Check type of data parameter update_nama_item
                 elif type(update_nama_item) != str:
                     raise TypeError(
                         "Parameter 'update_nama_item' memiliki tipe data 'str'"
                     )
+
                 else:
                     # Filter by name_item
                     # assign update_nama_item in attribute class data
                     self.data.loc[
-                        self.data.Item == nama_item, "Item"
+                        self.data.nama_item == nama_item, "nama_item"
                     ] = update_nama_item
                     print(
                         f"Anda merubah {nama_item} menjadi {update_nama_item}"
@@ -123,102 +165,103 @@ class Transaction:
             print(f"Item {nama_item} tidak ditemukan dalam sesi transaksi ini")
 
     def update_item_qty(self, nama_item: str, update_jml_item: int):
-        """Fungsi untuk mengupdate jumlah_item dalam jika nama_item
-            terdapat dalam attribute class data
+        """Fungsi untuk mengupdate jumlah_item jika nama_item terdapat dalam
+           attribute class data.
 
         Args:
             nama_item (str):
-                    nama item sebagai keys untuk mengupdate jumlah_item
+                    Nama item sebagai kunci untuk mengupdate jumlah_item.
             update_jml_item (int):
-                    value jumlah_item baru yang akan di update
+                    Nilai jumlah_item baru yang akan diupdate.
 
         Raises:
-            ValueError:
-                Jika nama_item tidak terdapat dalam attribute class data
-            TypeError:
-                Jika parameter nama_item bukan string
-            TypeError:
-                Jika parameter update_jml_item bukan integer
-        """
+            ValueError: Jika nama_item tidak terdapat dalam attribute class.
+            TypeError: Jika parameter nama_item bukan string.
+            ValueError: Jika parameter update_jml_item bukan integer positif.
 
-        # Create list of all item in attribute class data
-        list_nama_item = self.data["Item"].tolist()
+        Returns:
+            None
+        """
+        # Create list of all items in attribute class data
+        list_nama_item = self.data["nama_item"].tolist()
         try:
             # Check parameter nama_item in list_nama_item
             if nama_item not in list_nama_item:
-                raise ValueError
+                raise ValueError(
+                    f"Item {nama_item} tidak ditemukan dalam sesi transaksi"
+                )
+
             else:
                 # Check type of data parameter nama_item
-                if type(nama_item) != str:
+                if not isinstance(nama_item, str):
                     raise TypeError(
                         "Parameter 'nama_item' harus memiliki tipe data 'str'"
                     )
-                # Check type of data parameter update_jml_item
-                elif type(update_jml_item) != int:
-                    raise TypeError(
-                        "Parameter 'update_jml_item' memiliki tipe data 'int'"
-                    )
+
+                # Check type of data parameter update_jml_item and
+                # ensure it is a positive integer
+                if not isinstance(update_jml_item, int) or update_jml_item < 0:
+                    raise ValueError()
+
                 else:
                     # Filter by nama_item
-                    # assign update_jml_item in attribute class data
+                    # Assign update_jml_item in attribute class data
                     self.data.loc[
-                        self.data.Item == nama_item, "JumlahBarang"
+                        self.data.nama_item == nama_item, "jumlah_item"
                     ] = update_jml_item
                     print(
-                        f"Anda merubah Jumlah {nama_item} menjadi {update_jml_item}"
+                        f"Anda merubah Jumlah {nama_item} -> {update_jml_item}"
                     )
 
         except ValueError:
-            print(f"Item {nama_item} tidak ditemukan dalam sesi transaksi ini")
+            print("Parameter 'update_jml_item' harus integer positif")
 
     def update_item_price(self, nama_item: str, update_harga: float or int):
-        """Fungsi untuk mengupdate harga dalam jika nama_item terdapat
-            dalam attribute class data
+        """Fungsi untuk mengupdate harga jika nama_item terdapat dalam
+        attribute class data.
 
         Args:
-            nama_item (str): nama item sebagai keys untuk mengupdate harga
-            update_harga (float / int): value harga baru yang akan di update
+            nama_item (str): Nama item sebagai kunci untuk mengupdate harga.
+            update_harga (float or int): Nilai harga baru yang akan diupdate.
 
         Raises:
-            ValueError:
-                Jika nama_item tidak terdapat dalam attribute class data
-            TypeError:
-                Jika parameter nama_item bukan string
-            TypeError:
-                Jika parameter update_harga bukan integer atau float
+            ValueError: Jika nama_item tidak terdapat dalam attribute class.
+            TypeError: Jika parameter nama_item bukan string.
+            ValueError: Jika parameter update_harga bukan integer positif.
+
+        Returns:
+            None
         """
-        # Create list of all item in attribute class data
-        list_nama_item = self.data["Item"].tolist()
+        # Create list of all items in attribute class data
+        list_nama_item = self.data["nama_item"].tolist()
         try:
             # Check parameter nama_item in list_nama_item
             if nama_item not in list_nama_item:
-                raise ValueError
-
+                raise ValueError(
+                    f"Item {nama_item} tidak ditemukan dalam sesi transaksi"
+                )
             else:
                 # Check type of data parameter nama_item
-                if type(nama_item) != str:
+                if not isinstance(nama_item, str):
                     raise TypeError(
                         "Parameter 'nama_item' harus memiliki tipe data 'str'"
                     )
-
-                # Check type of data parameter update_harga
-                elif type(update_harga) != float and type(update_harga) != int:
-                    raise TypeError(
-                        "Parameter 'update_harga' memiliki tipe data float/int"
-                    )
-
+                # Check type of data parameter update_harga and
+                # ensure it is a positive number
+                if not (
+                    isinstance(update_harga, (float, int))
+                    and update_harga >= 0
+                ):
+                    raise ValueError()
                 else:
                     # Filter by nama_item
-                    # assign update_harga in attribute class data
+                    # Assign update_harga in attribute class data
                     self.data.loc[
-                        self.data.Item == nama_item, "Harga"
+                        self.data.nama_item == nama_item, "harga"
                     ] = update_harga
-                    print(
-                        f"Anda merubah harga {nama_item} menjadi {update_harga}"
-                    )
-
+                    print(f"Anda merubah harga {nama_item} -> {update_harga}")
         except ValueError:
-            print(f"Item {nama_item} tidak ditemukan dalam sesi transaksi ini")
+            print("Param 'update_harga' harus merupakan float/integer positif")
 
     def delete_item(self, nama_item: str):
         """Fungsi untuk menghapus salah satu item yang terdapat dalam
@@ -238,7 +281,7 @@ class Transaction:
         """
 
         # Create list of all item in attribute class data
-        list_nama_item = self.data["Item"].tolist()
+        list_nama_item = self.data["nama_item"].tolist()
         try:
             # Check parameter nama_item in list_nama_item
             if nama_item not in list_nama_item:
@@ -258,7 +301,7 @@ class Transaction:
 
                     # Filter and drop by nama_item
                     data = self.data.drop(
-                        self.data.index[self.data.Item == nama_item],
+                        self.data.index[self.data.nama_item == nama_item],
                         inplace=True,
                     )
 
@@ -299,55 +342,66 @@ class Transaction:
         output_data = self.data.copy()
 
         # Create new column
-        output_data["TotalHarga"] = (
-            output_data.JumlahBarang * output_data.Harga
+        output_data["total_harga"] = (
+            output_data.jumlah_item * output_data.harga
         )
         # Create and show table
         table = tabulate(output_data, headers="keys", tablefmt="psql")
 
         return print(table)
 
-    def total_price(self):
-        """Fungsi untuk menghitung total transaksi beserta diskonnya
+    def check_out(self):
+        """Fungsi untuk menghitung total harga dan diskon untuk tiap item.
 
         Returns:
-            int : total transaksi
+        list: List of dictionaries berisi (nama_item, jumlah_item, harga,
+              total_harga, diskon, harga_diskon).
         """
+        # Create database if not exists
+        create_db()
+
         # Copy attribute class data
         output_data = self.data.copy()
-        # Create new column
-        output_data["TotalHarga"] = (
-            output_data.JumlahBarang * output_data.Harga
+
+        # Create new columns for total_harga, diskon and harga_diskon
+        output_data["total_harga"] = (
+            output_data.jumlah_item * output_data.harga
         )
-        # Assign variable total payment
-        total = np.sum(output_data.TotalHarga)
+        output_data["diskon"] = 0
+        output_data["harga_diskon"] = 0
 
-        # If total payment les than 200.000 get normal price
-        if total >= 0 and total <= 200_000:
-            return print(f"Total Transaksi Anda adalah Rp.{int(total)}")
+        # Calculate discounts and final prices for each item
+        for index, row in output_data.iterrows():
+            total_harga = row["jumlah_item"] * row["harga"]
+            diskon = 0
+            harga_diskon = total_harga
 
-        # if total paymen more than 200.000 and less than 300.000
-        # Get 5 percent discount
-        elif total > 200_000 and total <= 300_000:
-            total_belanja = total * 0.95
-            return print(
-                f"Total Transaksi Anda adalah Rp.{int(total_belanja)}"
-            )
+            # Determine discount rates based on total_harga
+            if total_harga > 500000:
+                diskon = 0.07
+            elif total_harga > 300000:
+                diskon = 0.06
+            elif total_harga > 200000:
+                diskon = 0.05
 
-        # if total paymen more than 300.000 and less than 500.000
-        # Get 8 percent discount
-        elif total > 300_000 and total <= 500_000:
-            total_belanja = total * 0.92
-            return print(
-                f"Total Transaksi Anda adalah Rp.{int(total_belanja)}"
-            )
+            if diskon > 0:
+                harga_diskon = total_harga - (total_harga * diskon)
 
-        # if total paymen more than 500.000, get 10 percent discount
-        elif total > 500_000:
-            total_belanja = total * 0.90
-            return print(
-                f"Total Transaksi Anda adalah Rp.{int(total_belanja)}"
-            )
+            output_data.at[index, "diskon"] = int(diskon * 100)
+            output_data.at[index, "harga_diskon"] = harga_diskon
 
-        else:
-            return "Total Belanja Tidak Boleh Negatif"
+        # Create and show table
+        table = tabulate(output_data, headers="keys", tablefmt="psql")
+
+        print("\n")
+        print("Silahkan Lanjutkan Pembayaran")
+        print(table)
+        print(
+            "----------------------------------------------------------------"
+        )
+        print(f"Total Pembayaran Anda adalah {output_data.harga_diskon.sum()}")
+
+        # Convert the output_data to a list of dictionaries
+        result_list = output_data.to_dict(orient="records")
+
+        return insert_to_table(result_list)

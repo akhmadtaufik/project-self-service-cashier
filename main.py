@@ -5,14 +5,13 @@ user = Transaction()
 # Add Item 1
 print("Test Case 1")
 print("-----------")
-user.add_item("Ayam Goreng", 2, 20_000)
+user.add_item("Ayam Goreng", 15, 20_000)
 print("\n")
 # Add Item 2
 user.add_item("Pasta Gigi", 3, 15_000)
 print("\n")
 print("Order Table :")
 user.check_order()
-user.total_price()
 
 # Test Case 2
 # Delete pasta gigi from order table
@@ -22,7 +21,7 @@ print("-----------")
 user.delete_item("Pasta Gigi")
 print("Order Table :")
 user.check_order()
-user.total_price()
+user.check_out()
 
 # Test Case 3
 # Reset all transaction
@@ -49,7 +48,7 @@ user.add_item("Mie Instan", 5, 3_000)
 print("\n")
 print("Order Table :")
 user.check_order()
-user.total_price()
+user.check_out()
 
 # Test Case 5
 # Update Item, JumlahBarang, dan Harga
@@ -58,7 +57,6 @@ print("Test Case 5")
 print("-----------")
 print("Order Table Before:")
 user.check_order()
-user.total_price()
 print("\n")
 # Update Item pasta gigi
 user.update_item_name("Pasta Gigi", "Sabun Mandi")
@@ -69,4 +67,5 @@ user.update_item_price("Mie Instan", 3_500)
 print("\n")
 print("Order Table After:")
 user.check_order()
-user.total_price()
+
+user.check_out()
